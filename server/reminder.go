@@ -6,24 +6,33 @@ import (
 	"github.con/reward-rabieth/Task-Api/core/components/Reminder/models"
 	"net/http"
 	"strconv"
+	"time"
 )
+
+type CreateReminderRequest struct {
+	ContactName  string    `json:"contactName"`
+	ReminderTime time.Time `json:"reminderTime"`
+}
 
 func (app *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse and validate request body
-	var reminder models.Reminder
-	if err := json.NewDecoder(r.Body).Decode(&reminder); err != nil {
+	var reqBody CreateReminderRequest
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Use your ReminderService to create the reminder
-	if err := app.ReminderRepo.CreateReminder(r.Context(), &reminder); err != nil {
+	createdReminder, err := app.ReminderRepo.CreateReminder(r.Context(), &models.Reminder{
+		ReminderTime: reqBody.ReminderTime,
+		ContactName:  reqBody.ContactName,
+	})
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(reminder)
+	json.NewEncoder(w).Encode(createdReminder)
 }
 
 func (app *App) GetReminderHandler(w http.ResponseWriter, r *http.Request) {

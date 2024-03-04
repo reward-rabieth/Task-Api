@@ -13,7 +13,7 @@ func (app *App) NewHandler() http.Handler {
 		r.Post("/", app.CreateTaskHandler)
 		r.Get("/{id}", app.GetTaskHandler)
 		r.Put("/{id}", app.UpdateTaskHandler)
-		r.Delete("{id}", app.DeleteTaskHandler)
+		r.Delete("/{id}", app.DeleteTaskHandler)
 
 	})
 

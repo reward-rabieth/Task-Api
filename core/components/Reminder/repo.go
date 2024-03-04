@@ -4,10 +4,11 @@ import (
 	"context"
 	"github.con/reward-rabieth/Task-Api/core/components/Reminder/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Repo interface {
-	CreateReminder(ctx context.Context, reminder *models.Reminder) error
+	CreateReminder(ctx context.Context, reminder *models.Reminder) (*models.Reminder, error)
 	GetReminder(ctx context.Context, id uint) (*models.Reminder, error)
 	UpdateReminder(ctx context.Context, id uint, reminder *models.Reminder) error
 	DeleteReminder(ctx context.Context, id uint) error
@@ -22,8 +23,9 @@ func NewRepo(db *gorm.DB) (r *repo, err error) {
 	return
 }
 
-func (s *repo) CreateReminder(ctx context.Context, reminder *models.Reminder) error {
-	return s.db.Create(reminder).Error
+func (s *repo) CreateReminder(ctx context.Context, reminder *models.Reminder) (*models.Reminder, error) {
+	result := s.db.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(reminder)
+	return reminder, result.Error
 }
 
 func (s *repo) GetReminder(ctx context.Context, id uint) (*models.Reminder, error) {
