@@ -1,0 +1,7 @@
+port: 5435
+db-name: task-reminder
+db-args: "sslmode=disable"
+db-user: root
+db-password: taskreminder
+postgres-addr: localhost:5432
+db-migration: trues
