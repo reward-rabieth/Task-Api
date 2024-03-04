@@ -8,22 +8,33 @@ import (
 	"strconv"
 )
 
+type CreateTaskRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Priority    string `json:"priority"`
+}
+
 func (app *App) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse and validate request body
-	var task models.Task
-	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+	var reqBody CreateTaskRequest
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// Use your TaskService to create the task
-	if err := app.TaskRepo.CreateTask(r.Context(), &task); err != nil {
+	createdTask, err := app.TaskRepo.CreateTask(r.Context(), &models.Task{
+		Title:       reqBody.Title,
+		Description: reqBody.Description,
+		Priority:    reqBody.Priority,
+	})
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(task)
+	json.NewEncoder(w).Encode(createdTask)
 }
 
 func (app *App) GetTaskHandler(w http.ResponseWriter, r *http.Request) {

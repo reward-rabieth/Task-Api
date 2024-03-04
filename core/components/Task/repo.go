@@ -4,10 +4,11 @@ import (
 	"context"
 	"github.con/reward-rabieth/Task-Api/core/components/Task/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Repo interface {
-	CreateTask(ctx context.Context, task *models.Task) error
+	CreateTask(ctx context.Context, task *models.Task) (*models.Task, error)
 	GetTask(ctx context.Context, id uint) (*models.Task, error)
 	UpdateTask(ctx context.Context, id uint, task *models.Task) error
 	DeleteTask(ctx context.Context, id uint) error
@@ -22,8 +23,9 @@ func NewRepo(db *gorm.DB) (r *repo, err error) {
 	return
 }
 
-func (s *repo) CreateTask(ctx context.Context, task *models.Task) error {
-	return s.db.Create(task).Error
+func (s *repo) CreateTask(ctx context.Context, task *models.Task) (*models.Task, error) {
+	s.db.Clauses(clause.OnConflict{UpdateAll: true}).Create(task)
+	return task, nil
 }
 
 func (s *repo) GetTask(ctx context.Context, id uint) (*models.Task, error) {
